@@ -87,6 +87,22 @@ public class SqlInjectionLesson6aTest extends SqlLessonTest {
   }
 
   @Test
+  public void usernameWithQuotesIsTreatedAsLiteralValue() throws Exception {
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.put("/SqlInjectionAdvanced/challenge")
+                .param("username_reg", "tom' AND substring(password,1,1)='t")
+                .param("email_reg", "someone@example.com")
+                .param("password_reg", "password"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.lessonCompleted", is(true)))
+        .andExpect(
+            jsonPath(
+                "$.feedback",
+                containsString("User tom' AND substring(password,1,1)='t created")));
+  }
+
+  @Test
   public void noResultsReturned() throws Exception {
     mockMvc
         .perform(
