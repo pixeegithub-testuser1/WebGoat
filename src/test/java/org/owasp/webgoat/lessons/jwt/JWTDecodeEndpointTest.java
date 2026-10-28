@@ -1,5 +1,6 @@
 package org.owasp.webgoat.lessons.jwt;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -37,5 +38,17 @@ public class JWTDecodeEndpointTest extends LessonTest {
                 .content(""))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.lessonCompleted", is(false)));
+  }
+
+  @Test
+  public void sqlMetacharactersInUsernameAreTreatedAsData() throws Exception {
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.put("/SqlInjectionAdvanced/challenge")
+                .param("username_reg", "' OR '1'='1' --")
+                .param("email_reg", "sql-injection-test@example.com")
+                .param("password_reg", "password"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.feedback", containsString("created")));
   }
 }
